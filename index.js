@@ -11,11 +11,12 @@ const client = new Client({
   ]
 });
 
+const PREFIX = "!"; // Prefix burada tanımlandı
 const BOT_NAME = "Sa-As Bot";
 const AUTHOR = "DRK";
 const botStartTime = Date.now();
 
-// --- HTTP SUNUCU (Uptime İçin) ---
+// --- HTTP SUNUCU (Uptime Hizmetleri İçin) ---
 const PORT = process.env.PORT || 10000;
 http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
@@ -49,13 +50,12 @@ function createProgressBar(percent) {
 client.on('ready', () => {
   console.log(`
 ╔════════════════════════════════════════╗
-║    ${client.user.username} ÇALIŞIYOR!      ║
-║    Sunucu Sayısı: ${client.guilds.size}          ║
+║    ${client.user.username} AKTİF!      ║
+║    Prefix: ${PREFIX}                       ║
 ╚════════════════════════════════════════╝`);
 });
 
 client.on('messageCreate', async (message) => {
-  // Botları ve DM olmayan boş mesajları engelle
   if (message.author.bot || !message.guild) return;
 
   const rawContent = message.content;
@@ -82,14 +82,14 @@ client.on('messageCreate', async (message) => {
     try {
       if (message.deletable) {
         await message.delete();
-        const warn = await message.channel.send(`⚠️ <@${message.author.id}>, **Argo/Küfür yasaktır! Mesajın silindi.**`);
+        const warn = await message.channel.send(`⚠️ <@${message.author.id}>, **Argo/Küfür kullanımı yasaktır! Mesajın silindi.**`);
         setTimeout(() => warn.delete().catch(() => {}), 4000);
       }
-      return; // Küfür varsa diğer işlemleri durdur
+      return; 
     } catch (e) { console.error("Silme hatası:", e); }
   }
 
-  // ─── 2. OTOMATİK SELAMLAŞMA ────────────────────────────────
+  // ─── 2. OTOMATİK SELAMLAŞMA (Prefix Gerektirmez) ──────────
   const selamlar = {
     "sa": "Aleyküm Selam, hoş geldin! 👋",
     "sea": "Aleyküm Selam, hoş geldin! 👋",
@@ -104,9 +104,9 @@ client.on('messageCreate', async (message) => {
     return await message.reply(`**${selamlar[content]}**`);
   }
 
-  // ─── 3. KOMUTLAR ──────────────────────────────────────────
-  if (!message.content.startsWith("!")) return;
-  const cmd = content.slice(1).split(" ")[0];
+  // ─── 3. KOMUTLAR (Prefix Kontrolü) ──────────────────────────
+  if (!message.content.startsWith(PREFIX)) return;
+  const cmd = content.slice(PREFIX.length).split(" ")[0];
 
   switch(cmd) {
     case "monitor":
@@ -149,12 +149,11 @@ client.on('messageCreate', async (message) => {
     case "yardim":
     case "help": {
       const embed = new EmbedBuilder()
-        .setTitle("📖 Komut Listesi")
-        .setDescription("Otomod ve Selamlaşma sistemi aktiftir.")
+        .setTitle("📖 Komut Menüsü")
+        .setDescription(`Botun prefixi: \`${PREFIX}\``)
         .addFields(
-          { name: "🔹 !monitor", value: "Sistem yükünü gösterir.", inline: true },
-          { name: "🔹 !ascii", value: "Bot logosunu gösterir.", inline: true },
-          { name: "🔹 !help", value: "Bu menüyü açar.", inline: true }
+          { name: "🔹 Komutlar", value: `\`${PREFIX}monitor\`, \`${PREFIX}ascii\`, \`${PREFIX}help\``, inline: true },
+          { name: "🔹 Otomasyon", value: "Selamlaşma ve Küfür Filtresi Aktif!", inline: true }
         )
         .setColor(Colors.Green)
         .setTimestamp();
@@ -165,5 +164,4 @@ client.on('messageCreate', async (message) => {
   }
 });
 
-// Botu başlat
 client.login(process.env.BOT_TOKEN);
