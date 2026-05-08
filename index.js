@@ -94,58 +94,47 @@ client.on('messageCreate', async (message) => {
     return await message.reply(`**${selamlar[content]}**`);
   }
 
-  // ─── 3. KOMUTLAR (Prefix: selambot) ─────────────────────────
-  if (!content.startsWith(PREFIX)) return;
+    // ─── 3. KOMUTLAR (Gelişmiş Prefix Kontrolü) ─────────────────
   
-  // Prefix'ten sonrasını al (yardim, monitor vb.)
-  const cmd = content.slice(PREFIX.length).trim().split(" ")[0];
+  // Mesaj "selambot" ile başlıyorsa (boşluklu veya bitişik fark etmez)
+  if (content.startsWith("selambot")) {
+    
+    // "selambot" kelimesini atıp geri kalan metni temizliyoruz
+    // Örn: "selambot  yardim" -> "yardim"
+    const cmd = content.replace("selambot", "").trim().split(" ")[0];
 
-  switch(cmd) {
-    case "monitor": {
-      const stats = getSystemStats();
-      const embed = new EmbedBuilder()
-        .setTitle("🖥️ SelamBot Sistem Durumu")
-        .setColor(Colors.Blue)
-        .addFields(
-          { name: "⏲️ Uptime", value: `\`${stats.uptime}\``, inline: false },
-          { name: "🚀 İşlemci", value: `\`%${stats.cpu}\``, inline: true },
-          { name: "🧠 RAM", value: `\`%${stats.ram}\` (${stats.ramUsed}/${stats.ramTotal}GB)`, inline: true }
-        )
-        .setFooter({ text: `${BOT_NAME} • ${AUTHOR}` });
-      
-      await message.reply({ embeds: [embed] });
-      break;
-    }
+    switch(cmd) {
+      case "yardim":
+      case "help": {
+        const embed = new EmbedBuilder()
+          .setTitle("📖 SelamBot Yardım Menüsü")
+          .setDescription("Komutları kullanmak için: `selambot <komut>`")
+          .addFields(
+            { name: "🔹 Komutlar", value: "`yardim`, `monitor`, `ascii`", inline: false },
+            { name: "🔹 Örnek", value: "`selambot yardim` veya `selambot monitor`", inline: false }
+          )
+          .setColor(Colors.Green);
+        
+        return await message.reply({ embeds: [embed] });
+      }
 
-    case "ascii": {
-      const art = "```\n" + 
-`╔════════════════════════════════════════╗
-║    ███████╗ █████╗      █████╗ ███████╗  ║
-║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
-║    ███████╗███████║    ███████║███████╗ ║
-║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
-║    ███████║██║  ██║    ██║  ██║███████║  ║
-║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
-╚════════════════════════════════════════╝` + "\n```";
-      
-      await message.reply(art);
-      break;
-    }
+      case "monitor": {
+        const stats = getSystemStats();
+        const embed = new EmbedBuilder()
+          .setTitle("🖥️ SelamBot Sistem Durumu")
+          .setColor(Colors.Blue)
+          .addFields(
+            { name: "🚀 İşlemci", value: `\`%${stats.cpu}\``, inline: true },
+            { name: "🧠 RAM", value: `\`%${stats.ram}\``, inline: true }
+          );
+        return await message.reply({ embeds: [embed] });
+      }
 
-    case "yardim": {
-      const embed = new EmbedBuilder()
-        .setTitle("📖 SelamBot Yardım Menüsü")
-        .setDescription(`Komutları kullanmak için prefix: \`${PREFIX}\``)
-        .addFields(
-          { name: "🔹 Komutlar", value: `\`${PREFIX}yardim\`, \`${PREFIX}monitor\`, \`${PREFIX}ascii\``, inline: false },
-          { name: "🔹 Otomasyon", value: "Selamlaşma ve Küfür Filtresi (m.a.l korumalı) aktif!", inline: false }
-        )
-        .setColor(Colors.Green);
-      
-      await message.reply({ embeds: [embed] });
-      break;
+      case "ascii": {
+        return await message.reply("```\n╔══════════════════╗\n║    SELAMBOT      ║\n╚══════════════════╝\n```");
+      }
     }
   }
-});
+
 
 client.login(process.env.BOT_TOKEN);
