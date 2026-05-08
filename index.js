@@ -127,9 +127,30 @@ client.on("messageCreate", async (message) => {
     await message.reply("**İyi geceler!** 🌙");
   }
 
-  // kufurler
-  if (content === "yarrak" || content === "yrk" || content === "am" || content === "göt" || content === "sik" || content === "tassak" || content === "taşşak" || content === "sikik" || content === "sikim" || content === "mal" || content === "salak" || content === "sikiş" || content === "dassak" || content === "daşşak" || content === "sokarım") {
-    await message.reply("**ayıp**");
+// ─── KÜFÜR VE ARGO FİLTRESİ (SİLME ÖZELLİKLİ) ────────────────
+  
+  const yasakliKelimeler = [
+    "yarrak", "yrk", "am", "göt", "sik", "tassak", "taşşak", 
+    "sikik", "sikim", "mal", "salak", "sikiş", "dassak", 
+    "daşşak", "sokarım", "amk", "aq", "piç"
+  ];
+
+  // Mesajın içinde yasaklı kelime geçiyor mu kontrolü (Cümle içi kontrol)
+  const kufurVarMi = yasakliKelimeler.some(kelime => content.includes(kelime));
+
+  if (kufurVarMi) {
+    try {
+      // Mesajı siler
+      await message.delete();
+      
+      // Kullanıcıyı uyarır ve 5 saniye sonra uyarı mesajını siler (opsiyonel)
+      const uyari = await message.channel.send(`⚠️ <@${message.author.id}>, **Lütfen kelimelerimize dikkat edelim, mesajın silindi!**`);
+      setTimeout(() => uyari.delete().catch(() => {}), 5000); 
+      
+      return; // Küfür yakalandıysa alt satırlardaki komutları çalıştırmaz
+    } catch (err) {
+      console.error("Mesaj silme yetkim yok veya mesaj zaten silinmiş:", err);
+    }
   }
 
   // ─── BOT MONİTOR ─────────────────────────────────────────────
@@ -175,26 +196,34 @@ client.on("messageCreate", async (message) => {
   }
   
   // ascii
-  if (cmd === "ascii")
+    // ─── ASCII KOMUTU ──────────────────────────────────────────
+  if (cmd === "ascii") {
+    // Çok satırlı metinler için backtick ( ` ) kullanıyoruz
+    const asciiArt = 
+`╔════════════════════════════════════════╗
+║    ███████╗ █████╗      █████╗ ███████╗  ║
+║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
+║    ███████╗███████║    ███████║███████╗ ║
+║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
+║    ███████║██║  ██║    ██║  ██║███████║  ║
+║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
+║                   SA - AS BOT                 ║
+║            Selam Verene Selam Cevabı          ║
+║                                               ║
+╚════════════════════════════════════════╝`;
+
     const embed = new EmbedBuilder()
-      .setTitle("╔════════════════════════════════════════╗
-               ("║    ███████╗ █████╗      █████╗ ███████╗  ║
-               ("║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
-               ("║    ███████╗███████║    ███████║███████╗ ║
-               ("║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
-               ("║    ███████║██║  ██║    ██║  ██║███████║  ║
-               ("║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
-               ("║                   SA - AS BOT                 ║
-               ("║            Selam Verene Selam Cevabı          ║
-               ("║                                               ║
-               ("╚════════════════════════════════════════╝")
-      .setDescription("ASCII")
-      .setColor(Colors.Black)
+      .setTitle("ASCII ART")
+      // Kod bloğu içine alıyoruz ki mobilde veya masaüstünde kaymasın
+      .setDescription(`\`\`\`\n${asciiArt}\n\`\`\``)
+      .addFields({ name: "Bilgi", value: "Selam Verene Selam Cevabı" })
+      .setColor(Colors.Blue)
       .setFooter({ text: "Sa As Bot • by DRK" })
       .setTimestamp();
+
     await message.reply({ embeds: [embed] });
-}
-                
+  }
+
   // ─── YARDIM ──────────────────────────────────────────────────
   if (cmd === "yardim" || cmd === "help") {
     const embed = new EmbedBuilder()
