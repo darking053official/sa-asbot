@@ -5,15 +5,15 @@ const os = require("os");
 // ASCII Logo
 console.log(`
 ╔════════════════════════════════════════╗
-║    ███████╗ █████╗      █████╗ ███████╗ ║
+║    ███████╗ █████╗      █████╗ ███████╗  ║
 ║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
 ║    ███████╗███████║    ███████║███████╗ ║
 ║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
-║    ███████║██║  ██║    ██║  ██║███████║ ║
-║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝ ║
-║         🤲 SA - AS BOT 🤲              ║
-║      Selam Verene Selam Cevabı        ║
-║         📍 by DRK 📍                   ║
+║    ███████║██║  ██║    ██║  ██║███████║  ║
+║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
+║                   SA - AS BOT                 ║
+║            Selam Verene Selam Cevabı          ║
+║                                               ║
 ╚════════════════════════════════════════╝
 `);
 
@@ -84,12 +84,12 @@ function formatUptime(ms) {
 client.on("ready", () => {
   console.log(`
 ╔════════════════════════════════════════╗
-║     🤲 SA AS BOT AKTİF 🤲              ║
+║               SA AS BOT AKTİF                 ║
 ╠════════════════════════════════════════╣
-║  ✅ ${client.user?.username} hazır!       ║
-║  📊 ${client.guilds.size} sunucu          ║
-║  🆔 ID: ${client.user?.id}               ║
-║  📍 by DRK                             ║
+║  ✅ ${client.user?.username} hazır!           ║
+║  📊 ${client.guilds.size} sunucu              ║
+║  🆔 ID: ${client.user?.id}                    ║
+║  📍 by DRK                                    ║
 ╚════════════════════════════════════════╝
   `);
 });
@@ -109,7 +109,7 @@ client.on("messageCreate", async (message) => {
   
   // as, aleyküm selam
   if (content === "as" || content === "aleyküm selam" || content === "aleykümselam") {
-    await message.reply("**Ve aleyküm selam** 🤝");
+    await message.reply("**Hoşgeldiniz** 🤝");
   }
   
   // selam
@@ -126,7 +126,12 @@ client.on("messageCreate", async (message) => {
   if (content === "iyi geceler") {
     await message.reply("**İyi geceler!** 🌙");
   }
-  
+
+  // kufurler
+  if (content === "yarrak" || content === "yrk" || content === "am" || content === "göt" || content === "sik" || content === "tassak" || content === "taşşak" || content === "sikik" || content === "sikim" || content === "mal" || content === "salak" || content === "sikiş" || content === "dassak" || content === "daşşak" || content === "sokarım") {
+    await message.reply("**ayıp**");
+  }
+
   // ─── BOT MONİTOR ─────────────────────────────────────────────
   if (cmd === "botmonitor" || cmd === "monitor") {
     const stats = getSystemStats();
@@ -154,7 +159,7 @@ client.on("messageCreate", async (message) => {
     const stats = getSystemStats();
     
     const embed = new EmbedBuilder()
-      .setTitle("📊 Sa As Bot İstatistikleri")
+      .setTitle("📊Bot İstatistikleri")
       .setColor(Colors.Gold)
       .addFields(
         { name: "📊 Sunucu", value: `\`${client.guilds.size}\``, inline: true },
@@ -169,6 +174,27 @@ client.on("messageCreate", async (message) => {
     await message.reply({ embeds: [embed] });
   }
   
+  // ascii
+  if (cmd === "ascii")
+    const embed = new EmbedBuilder()
+      .setTitle("╔════════════════════════════════════════╗
+               ("║    ███████╗ █████╗      █████╗ ███████╗  ║
+               ("║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
+               ("║    ███████╗███████║    ███████║███████╗ ║
+               ("║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
+               ("║    ███████║██║  ██║    ██║  ██║███████║  ║
+               ("║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
+               ("║                   SA - AS BOT                 ║
+               ("║            Selam Verene Selam Cevabı          ║
+               ("║                                               ║
+               ("╚════════════════════════════════════════╝")
+      .setDescription("ASCII")
+      .setColor(Colors.Black)
+      .setFooter({ text: "Sa As Bot • by DRK" })
+      .setTimestamp();
+    await message.reply({ embeds: [embed] });
+}
+                
   // ─── YARDIM ──────────────────────────────────────────────────
   if (cmd === "yardim" || cmd === "help") {
     const embed = new EmbedBuilder()
