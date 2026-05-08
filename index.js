@@ -2,21 +2,7 @@ const { Client, GatewayIntentBits, EmbedBuilder, Colors } = require("@jubbio/cor
 const http = require("http");
 const os = require("os");
 
-// ASCII Logo
-console.log(`
-╔════════════════════════════════════════╗
-║    ███████╗ █████╗      █████╗ ███████╗  ║
-║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
-║    ███████╗███████║    ███████║███████╗ ║
-║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
-║    ███████║██║  ██║    ██║  ██║███████║  ║
-║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
-║                   SA - AS BOT                 ║
-║            Selam Verene Selam Cevabı          ║
-║                                               ║
-╚════════════════════════════════════════╝
-`);
-
+// --- BOT YAPILANDIRMASI ---
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -25,222 +11,165 @@ const client = new Client({
   ]
 });
 
-// HTTP sunucu (Render için)
+const BOT_NAME = "Sa-As Bot";
+const AUTHOR = "DRK";
+const botStartTime = Date.now();
+
+// --- HTTP SUNUCU (Uptime Hizmetleri İçin) ---
 const PORT = process.env.PORT || 10000;
 http.createServer((req, res) => {
   res.writeHead(200, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ status: "online", bot: "SaAsBot" }));
-}).listen(PORT, () => console.log(`🌐 HTTP sunucu ${PORT} portunda`));
+  res.end(JSON.stringify({ status: "online", bot: BOT_NAME }));
+}).listen(PORT);
 
-// Bot başlangıç zamanı
-const botStartTime = Date.now();
-
-// Sistem bilgileri
+// --- YARDIMCI FONKSİYONLAR ---
 function getSystemStats() {
-  const totalMem = os.totalmem() / 1024 / 1024 / 1024;
-  const freeMem = os.freemem() / 1024 / 1024 / 1024;
+  const totalMem = os.totalmem() / (1024 ** 3);
+  const freeMem = os.freemem() / (1024 ** 3);
   const usedMem = totalMem - freeMem;
-  const memPercent = (usedMem / totalMem) * 100;
-  
-  const cpuUsage = os.loadavg()[0];
-  const cpuPercent = Math.min(100, (cpuUsage / os.cpus().length) * 100);
-  
   const uptime = os.uptime();
-  const days = Math.floor(uptime / 86400);
-  const hours = Math.floor((uptime % 86400) / 3600);
-  const minutes = Math.floor((uptime % 3600) / 60);
   
   return {
-    cpu: cpuPercent.toFixed(1),
-    ram: memPercent.toFixed(1),
+    cpu: (os.loadavg()[0] * 10).toFixed(1), // Daha gerçekçi bir yük tahmini
+    ram: ((usedMem / totalMem) * 100).toFixed(1),
     ramUsed: usedMem.toFixed(1),
     ramTotal: totalMem.toFixed(1),
-    uptime: `${days}g ${hours}s ${minutes}d`,
+    uptime: `${Math.floor(uptime / 86400)}g ${Math.floor((uptime % 86400) / 3600)}s`,
     platform: os.platform(),
     arch: os.arch()
   };
 }
 
-// Progress bar
 function createProgressBar(percent) {
-  const filled = Math.floor(percent / 10);
-  const empty = 10 - filled;
-  return "█".repeat(filled) + "░".repeat(empty);
+  const filled = Math.min(10, Math.floor(percent / 10));
+  return "█".repeat(filled) + "░".repeat(10 - filled);
 }
 
-// Uptime format
-function formatUptime(ms) {
-  const seconds = Math.floor(ms / 1000);
-  const days = Math.floor(seconds / 86400);
-  const hours = Math.floor((seconds % 86400) / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  const parts = [];
-  if (days > 0) parts.push(`${days}g`);
-  if (hours > 0) parts.push(`${hours}s`);
-  if (minutes > 0) parts.push(`${minutes}d`);
-  return parts.join(" ") || "0d";
-}
-
+// --- ANA OLAYLAR ---
 client.on("ready", () => {
-  console.log(`
-╔════════════════════════════════════════╗
-║               SA AS BOT AKTİF                 ║
-╠════════════════════════════════════════╣
-║  ✅ ${client.user?.username} hazır!           ║
-║  📊 ${client.guilds.size} sunucu              ║
-║  🆔 ID: ${client.user?.id}                    ║
-║  📍 by DRK                                    ║
-╚════════════════════════════════════════╝
-  `);
+  console.log(`[LOG] ${client.user.username} olarak giriş yapıldı!`);
 });
 
 client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  
-  const content = message.content.toLowerCase().trim();
-  const cmd = message.content.startsWith("!") ? message.content.slice(1).trim().toLowerCase() : null;
-  
-  // ─── SELAM KOMUTLARI ─────────────────────────────────────────
-  
-  // sa, sea, selamın aleyküm
-  if (content === "sa" || content === "sea" || content === "selamın aleyküm" || content === "selamünaleyküm") {
-    await message.reply("**Aleyküm selam** 👋");
-  }
-  
-  // as, aleyküm selam
-  if (content === "as" || content === "aleyküm selam" || content === "aleykümselam") {
-    await message.reply("**Hoşgeldiniz** 🤝");
-  }
-  
-  // selam
-  if (content === "selam") {
-    await message.reply("**Aleyküm selam, hoş geldin!** 😊");
-  }
-  
-  // günaydın
-  if (content === "günaydın" || content === "gunaydin") {
-    await message.reply("**Günaydın!** ☀️");
-  }
-  
-  // iyi geceler
-  if (content === "iyi geceler") {
-    await message.reply("**İyi geceler!** 🌙");
-  }
+  if (message.author.bot || !message.guild) return;
 
-// ─── KÜFÜR VE ARGO FİLTRESİ (SİLME ÖZELLİKLİ) ────────────────
+  const rawContent = message.content;
+  const content = rawContent.toLowerCase().trim();
   
+  // ─── DEV KÜFÜR VE ARGO LİSTESİ ──────────────────────────────
   const yasakliKelimeler = [
-    "yarrak", "yrk", "am", "göt", "sik", "tassak", "taşşak", 
-    "sikik", "sikim", "mal", "salak", "sikiş", "dassak", 
-    "daşşak", "sokarım", "amk", "aq", "piç"
+    // Genel ve Ağır Küfürler
+    "amk", "amq", "aq", "orospu", "oç", "pic", "piç", "siktir", "sik", "am", "got", "göt", "yarrak", "yrk",
+    "dassak", "tassak", "taşşak", "sikik", "serefsiz", "şerefsiz", "pezevenk", "pzvng", "pust", "puşt",
+    "gavat", "pezevenk", "kahpe", "yavsak", "yavşak", "ibne", "top", "fahişe", "fahise",
+
+    // Cümle İçinde Kullanılan Eylem Küfürleri
+    "sokarım", "sokayım", "sikim", "siktiğim", "sikiş", "sikis", "amcık", "amcik", "götveren", "gotveren",
+    "götlek", "amına", "amina", "ananı", "anani", "bacını", "bacini", "avradını", "avradini", "karını", "karini",
+    "sülaleni", "sulaleni", "gelmişini", "geçmişini", "gelmisini", "gecmisini",
+
+    // Dini/Milli Değerlere Saldırı (Hassas Filtre)
+    "allahsız", "allahsiz", "kitapsız", "kitapsiz", "imansız", "imansiz", "dinini", "imanını",
+
+    // Hakaret ve Aşağılama
+    "mal", "salak", "gerizekali", "gerizekalı", "aptal", "it", "köpek", "gevşek", "adi", "alçak", "kodumun",
+    "ezik", "kekonun", "beyinsiz", "özürlü", "ozurlu", "am biti", "am biti", "dağ ayısı",
+
+    // Kısaltmalar ve Gizli Küfürler
+    "sg", "sq", "amk", "amjk", "amnn", "31", "anan", "bacın", "bacin", "götün", "gotun", "götoş", "gotos"
   ];
 
-  // Mesajın içinde yasaklı kelime geçiyor mu kontrolü (Cümle içi kontrol)
-  const kufurVarMi = yasakliKelimeler.some(kelime => content.includes(kelime));
+  // Regex: Mesajdaki tüm noktalama, boşluk ve benzeri karakterleri siler (Örn: m.a.l -> mal)
+  // Ayrıca sayıları harfe benzetmeye çalışanları da (Örn: 4mk -> amk) yakalaması için geliştirilebilir.
+  const cleanContent = content
+    .replace(/[^a-z0-9ğüşıöç]/g, "") // Noktalama işaretlerini siler
+    .replace(/0/g, "o") // 0 -> o değişimi
+    .replace(/1/g, "i") // 1 -> i değişimi
+    .replace(/3/g, "e") // 3 -> e değişimi
+    .replace(/4/g, "a") // 4 -> a değişimi
+    .replace(/5/g, "s"); // 5 -> s değişimi
 
-  if (kufurVarMi) {
-    try {
-      // Mesajı siler
-      await message.delete();
-      
-      // Kullanıcıyı uyarır ve 5 saniye sonra uyarı mesajını siler (opsiyonel)
-      const uyari = await message.channel.send(`⚠️ <@${message.author.id}>, **Lütfen kelimelerimize dikkat edelim, mesajın silindi!**`);
-      setTimeout(() => uyari.delete().catch(() => {}), 5000); 
-      
-      return; // Küfür yakalandıysa alt satırlardaki komutları çalıştırmaz
-    } catch (err) {
-      console.error("Mesaj silme yetkim yok veya mesaj zaten silinmiş:", err);
+  const hasBadWord = yasakliKelimeler.some(word => 
+    content.includes(word) || 
+    cleanContent.includes(word)
+  );
+
+  if (hasBadWord) {
+    if (message.deletable) {
+      try {
+        await message.delete();
+        const warn = await message.channel.send(`⚠️ **Hey <@${message.author.id}>!** Filtreye takıldın. Argo/Küfür kullanımı yasaktır!`);
+        setTimeout(() => warn.delete().catch(() => {}), 4000);
+      } catch (e) { console.error("Silme hatası:", e); }
     }
+    return;
   }
 
-  // ─── BOT MONİTOR ─────────────────────────────────────────────
-  if (cmd === "botmonitor" || cmd === "monitor") {
-    const stats = getSystemStats();
-    const cpuBar = createProgressBar(parseFloat(stats.cpu));
-    const ramBar = createProgressBar(parseFloat(stats.ram));
-    
-    const embed = new EmbedBuilder()
-      .setTitle("🖥️ Linux Server Monitor")
-      .setColor(Colors.Blue)
-      .addFields(
-        { name: "⏱️ Uptime", value: `\`${stats.uptime}\``, inline: false },
-        { name: "🖥️ CPU", value: `\`${stats.cpu}%\` ${cpuBar}`, inline: true },
-        { name: "💾 RAM", value: `\`${stats.ram}%\` ${ramBar}\n${stats.ramUsed}GB / ${stats.ramTotal}GB`, inline: true },
-        { name: "💿 Sistem", value: `\`${stats.platform} ${stats.arch}\``, inline: true }
-      )
-      .setFooter({ text: "Sa As Bot • by DRK" })
-      .setTimestamp();
-    
-    await message.reply({ embeds: [embed] });
-  }
-  
-  // ─── BOT İSTATİSTİK ──────────────────────────────────────────
-  if (cmd === "botistatistik" || cmd === "botstats") {
-    const botUptime = Date.now() - botStartTime;
-    const stats = getSystemStats();
-    
-    const embed = new EmbedBuilder()
-      .setTitle("📊Bot İstatistikleri")
-      .setColor(Colors.Gold)
-      .addFields(
-        { name: "📊 Sunucu", value: `\`${client.guilds.size}\``, inline: true },
-        { name: "⏱️ Bot Uptime", value: `\`${formatUptime(botUptime)}\``, inline: true },
-        { name: "🖥️ CPU", value: `\`${stats.cpu}%\``, inline: true },
-        { name: "💾 RAM", value: `\`${stats.ram}%\``, inline: true },
-        { name: "🆔 Bot ID", value: `\`${client.user?.id}\``, inline: true }
-      )
-      .setFooter({ text: "Sa As Bot • by DRK" })
-      .setTimestamp();
-    
-    await message.reply({ embeds: [embed] });
-  }
-  
-  // ascii
-    // ─── ASCII KOMUTU ──────────────────────────────────────────
-  if (cmd === "ascii") {
-    // Çok satırlı metinler için backtick ( ` ) kullanıyoruz
-    const asciiArt = 
-`╔════════════════════════════════════════╗
-║    ███████╗ █████╗      █████╗ ███████╗  ║
-║    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝ ║
-║    ███████╗███████║    ███████║███████╗ ║
-║    ╚════██║██╔══██║    ██╔══██║╚════██║ ║
-║    ███████║██║  ██║    ██║  ██║███████║  ║
-║    ╚══════╝╚═╝  ╚═╝    ╚═╝  ╚═╝╚══════╝  ║
-║                   SA - AS BOT                 ║
-║            Selam Verene Selam Cevabı          ║
-║                                               ║
-╚════════════════════════════════════════╝`;
 
-    const embed = new EmbedBuilder()
-      .setTitle("ASCII ART")
-      // Kod bloğu içine alıyoruz ki mobilde veya masaüstünde kaymasın
-      .setDescription(`\`\`\`\n${asciiArt}\n\`\`\``)
-      .addFields({ name: "Bilgi", value: "Selam Verene Selam Cevabı" })
-      .setColor(Colors.Blue)
-      .setFooter({ text: "Sa As Bot • by DRK" })
-      .setTimestamp();
+  // ─── OTOMATİK CEVAPLAR ─────────────────────────────────────
+  const greetings = {
+    "sa": "Aleyküm Selam, hoş geldin! 👋",
+    "sea": "Aleyküm Selam, hoş geldin! 👋",
+    "selam": "Selam, nasılsın? 😊",
+    "günaydın": "Günaydın, harika bir gün dilerim! ☀️",
+    "iyi geceler": "İyi geceler, tatlı rüyalar! 🌙"
+  };
 
-    await message.reply({ embeds: [embed] });
+  if (greetings[content]) {
+    return message.reply(`**${greetings[content]}**`);
   }
 
-  // ─── YARDIM ──────────────────────────────────────────────────
-  if (cmd === "yardim" || cmd === "help") {
-    const embed = new EmbedBuilder()
-      .setTitle("📖 Sa As Bot Komutları")
-      .setDescription("🤲 Selam verene selam cevabı veren bot")
-      .setColor(Colors.Purple)
-      .addFields(
-        { name: "🕌 Selam", value: "`sa` `selam` `selamın aleyküm`", inline: true },
-        { name: "🤝 Selam Cevabı", value: "`as` `aleyküm selam`", inline: true },
-        { name: "☀️ Günaydın", value: "`günaydın`", inline: true },
-        { name: "🌙 İyi Geceler", value: "`iyi geceler`", inline: true },
-        { name: "🖥️ !botmonitor", value: "Sistem durumu", inline: true },
-        { name: "📊 !botistatistik", value: "Bot istatistik", inline: true }
-      )
-      .setFooter({ text: "Sa As Bot • by DRK" })
-      .setTimestamp();
-    await message.reply({ embeds: [embed] });
+  // ─── KOMUTLAR ──────────────────────────────────────────────
+  if (!message.content.startsWith("!")) return;
+  const cmd = content.slice(1).split(" ")[0];
+
+  switch(cmd) {
+    case "monitor":
+    case "botmonitor": {
+      const stats = getSystemStats();
+      const embed = new EmbedBuilder()
+        .setTitle("🖥️ Sistem Durumu")
+        .setColor(Colors.DarkVividPink)
+        .addFields(
+          { name: "🚀 İşlemci", value: `\`%${stats.cpu}\` ${createProgressBar(stats.cpu)}`, inline: true },
+          { name: "🧠 Bellek", value: `\`%${stats.ram}\` ${createProgressBar(stats.ram)}\n${stats.ramUsed}/${stats.ramTotal}GB`, inline: true },
+          { name: "⏲️ Çalışma", value: `\`${stats.uptime}\``, inline: false }
+        )
+        .setFooter({ text: `${BOT_NAME} • ${AUTHOR}` });
+      
+      message.reply({ embeds: [embed] });
+      break;
+    }
+
+    case "ascii": {
+      const ascii = "```\n" + 
+`    ███████╗ █████╗      █████╗ ███████╗
+    ██╔════╝██╔══██╗    ██╔══██╗██╔════╝
+    ███████╗███████║    ███████║███████╗
+    ╚════██║██╔══██║    ██╔══██║╚════██║
+    ███████║██║  ██║    ██║  ██║███████║` + "\n```";
+      
+      const embed = new EmbedBuilder()
+        .setTitle("✨ Bot Logo")
+        .setDescription(ascii)
+        .setColor(Colors.Blurple);
+      
+      message.reply({ embeds: [embed] });
+      break;
+    }
+
+    case "yardim":
+    case "help": {
+      const embed = new EmbedBuilder()
+        .setTitle("📖 Komut Menüsü")
+        .addFields(
+          { name: "🔹 Genel", value: "`!ascii`, `!monitor`, `!botstats`", inline: true },
+          { name: "🔹 Otomasyon", value: "Selamlaşma ve Küfür Koruması Aktif!", inline: true }
+        )
+        .setColor(Colors.Green);
+      message.reply({ embeds: [embed] });
+      break;
+    }
   }
 });
 
